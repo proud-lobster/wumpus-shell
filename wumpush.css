@@ -1,0 +1,29 @@
+body {
+    background-color: black;  
+}
+
+/* Console coloring */
+.wumpus-console, .wumpus-console input[type="text"] {
+    background-color: black;
+    color: white;
+    font: 1rem Inconsolata, monospace;
+}
+
+/* Strip input decoration */
+.wumpus-console input[type="text"] {
+    outline: none;
+    border: 0;
+    padding: 0;
+}
+
+/* Fit console lines */
+.wumpus-console .lines p {
+    margin: 0;
+    overflow-wrap: break-word;
+}
+
+/* Spacing at bottom */
+.wumpus-console .spacer {
+    height: 1em;
+    clear: both;
+}

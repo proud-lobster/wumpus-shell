@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Wumpus Console</title>
+    <script type="module" defer> 
+        import con from '/wumpush.js';
+        con("console-1").load();
+    </script>
+</head>
+
+<body>
+    <div id="console-1" class="wumpus-console">
+        <div class="lines">
+        </div>
+        <div>
+            <form class="input-form" autocomplete="off">
+                <label class="prompt"></label>
+                <input type="text" name="input" maxlength="80" spellcheck="false" />
+            </form>
+        </div>
+        <div class="spacer"></div>
+    </div>
+</body>
