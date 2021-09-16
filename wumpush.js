@@ -1,6 +1,9 @@
 import sockf from '/wumpusock.js'
 
 export default function (id) {
+
+    var sock = null;
+
     const term = () => document.querySelector("#" + id + ".wumpus-console");
     const lines = () => term().querySelector(".lines");
     const prompt = () => term().querySelector(".prompt");
@@ -16,8 +19,6 @@ export default function (id) {
         lines().appendChild(newP);
         refresh();
     };
-
-    var sock = sockf('wss://wumpus.online/', write);
 
     const setLineWidth = (w) => {
         refresh();
@@ -62,6 +63,7 @@ export default function (id) {
             setLineWidth($.vars.lineWidth);
             input().focus();
             write($.vars.greeting);
+            sock = sockf('wss://wumpus.online/', write);
         }
     };
 
