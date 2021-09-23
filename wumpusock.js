@@ -1,9 +1,15 @@
-export default function (url, writer) {
+export default function (url, writer, cb) {
 
     var sessionId = null;
+    var callback = cb;
 
     const sockout = t => {
         writer("WUMPUSOCK: " + t);
+    }
+
+    const goCallback = (c, s) => {
+        callback(c, s);
+        callback = cb;
     }
 
     const messageHandler = m => {
@@ -16,8 +22,8 @@ export default function (url, writer) {
             case "SUCCESS":
                 if (sessionId != sid) {
                     sessionId = sid;
-                    sockout("New session established");
                 }
+                goCallback(true, content);
                 break;
             case "PRINT":
                 writer(content);
@@ -59,6 +65,14 @@ export default function (url, writer) {
     const $ = {
         send: (t) => {
             getSocket().send("COMMAND|" + sessionId + "|" + t);
+        },
+        auth: (u,p,c) => {
+            getSocket().send("LOG_IN|" + sessionId + "|" + u + " " + p);
+            callback = c;
+        },
+        newUser: (u,p,c) => {
+            getSocket().send("CREATE_PLAYER|" + sessionId + "|" + u + " " + p);
+            callback = c;
         }
     };
 
