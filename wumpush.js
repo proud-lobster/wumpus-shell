@@ -17,9 +17,13 @@ export default function (id) {
     }
 
     const write = (t) => {
-        const newP = document.createElement("p");
-        newP.innerText = t;
-        lines().appendChild(newP);
+        if (t.includes("\n")) {
+            t.split("\n").forEach(l => write(l));
+        } else {
+            const newP = document.createElement("p");
+            newP.textContent = t;
+            lines().appendChild(newP);
+        }
         refresh();
     };
 

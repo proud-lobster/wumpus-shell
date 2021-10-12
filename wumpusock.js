@@ -13,7 +13,7 @@ export default function (url, writer, cb) {
     }
 
     const messageHandler = m => {
-        var parts = m.split("|");
+        var parts = m.split("\u001E");
         var type = parts[0];
         var sid = parts[1];
         var content = parts[2];
@@ -64,14 +64,14 @@ export default function (url, writer, cb) {
 
     const $ = {
         send: (t) => {
-            getSocket().send("COMMAND|" + sessionId + "|" + t);
+            getSocket().send("COMMAND\u001E" + sessionId + "\u001E" + t);
         },
         auth: (u,p,c) => {
-            getSocket().send("LOG_IN|" + sessionId + "|" + u + " " + p);
+            getSocket().send("LOG_IN\u001E" + sessionId + "\u001E" + u + " " + p);
             callback = c;
         },
         newUser: (u,p,c) => {
-            getSocket().send("CREATE_PLAYER|" + sessionId + "|" + u + " " + p);
+            getSocket().send("CREATE_PLAYER\u001E" + sessionId + "\u001E" + u + " " + p);
             callback = c;
         }
     };
