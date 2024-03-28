@@ -1,6 +1,7 @@
 export default function (url, writer, cb) {
 
     var sessionId = null;
+    var heartbeatTimer = null;
     var callback = cb;
 
     const sockout = t => {
@@ -12,16 +13,21 @@ export default function (url, writer, cb) {
         callback = cb;
     }
 
+    const heartbeat = () => {
+        getSocket().send(sessionId + "\u001EPING\u001E" + Date.now());
+    }
+
     const messageHandler = m => {
         var parts = m.split("\u001E");
-        var type = parts[0];
-        var sid = parts[1];
+        var sid = parts[0];
+        var type = parts[1];
         var content = parts[2];
 
         switch (type) {
             case "SUCCESS":
                 if (sessionId != sid) {
                     sessionId = sid;
+                    heartbeatTimer = setInterval(heartbeat, 5000);
                 }
                 goCallback(true, content);
                 break;
@@ -40,6 +46,7 @@ export default function (url, writer, cb) {
         }
         ws.onclose = (e) => {
             sockout("Disconnected from server (" + e.code + " - " + e.reason + ")");
+            clearInterval(heartbeatTimer);
         }
         ws.onerror = (e) => {
             sockout("Error (" + JSON.stringify(e) + ")");
@@ -64,14 +71,14 @@ export default function (url, writer, cb) {
 
     const $ = {
         send: (t) => {
-            getSocket().send("COMMAND\u001E" + sessionId + "\u001E" + t);
+            getSocket().send(sessionId + "\u001ECOMMAND\u001E" + t);
         },
-        auth: (u,p,c) => {
-            getSocket().send("LOG_IN\u001E" + sessionId + "\u001E" + u + " " + p);
+        auth: (u, p, c) => {
+            getSocket().send(sessionId + "\u001ELOG_IN\u001E" + u + " " + p);
             callback = c;
         },
-        newUser: (u,p,c) => {
-            getSocket().send("CREATE_PLAYER\u001E" + sessionId + "\u001E" + u + " " + p);
+        newUser: (u, p, c) => {
+            getSocket().send(sessionId + "\u001ECREATE_PLAYER\u001E" + u + " " + p);
             callback = c;
         }
     };

@@ -1,4 +1,4 @@
-import sockf from '/wumpusock.js'
+import sockf from './wumpusock.js'
 
 export default function (id) {
 
@@ -117,7 +117,7 @@ export default function (id) {
             setLineWidth($.vars.lineWidth);
             input().focus();
             write($.vars.greeting);
-            sock = sockf('wss://wumpus.online/', write, connectCallback);
+            sock = sockf('wss://wumpus.online:8443/socket', write, connectCallback);
         }
     };
 
