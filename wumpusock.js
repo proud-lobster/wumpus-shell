@@ -1,5 +1,5 @@
 export default function (url, writer, cb) {
-
+    // TODO pull out writer, push all server responses to callback
     var sessionId = null;
     var heartbeatTimer = null;
     var callback = cb;
@@ -27,6 +27,7 @@ export default function (url, writer, cb) {
             case "SUCCESS":
                 if (sessionId != sid) {
                     sessionId = sid;
+                    // TODO move heartbeat to onopen
                     heartbeatTimer = setInterval(heartbeat, 5000);
                 }
                 goCallback(true, content);
@@ -70,6 +71,7 @@ export default function (url, writer, cb) {
     }
 
     const $ = {
+        // TODO make these match the commands being sent (login, token, execute, logout)
         send: (t) => {
             getSocket().send(sessionId + "\u001ECOMMAND\u001E" + t);
         },
