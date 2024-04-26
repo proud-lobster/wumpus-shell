@@ -1,11 +1,6 @@
-import sockf from './wumpusock.js'
+import statef from './wumpustate.js'
 
 export default function (id) {
-
-    var sock = null;
-    var inputState = 0;
-    var username = null;
-    var pwCheck = null;
 
     const term = () => document.querySelector("#" + id + ".wumpus-console");
     const lines = () => term().querySelector(".lines");
@@ -35,59 +30,13 @@ export default function (id) {
         input().style.width = (w - l) + "ch";
     }
 
-    const connectCallback = () => {
-        inputState = 2;
-        write("Enter your username, or enter 'NEW' to create a new player.");
-    }
-
-    const authCallback = (c, s) => {
-        write(s);
-        if (c) {
-            inputState = 1;
-        } else {
-            username = null;
-            connectCallback();
-        }
-    }
+    var state = statef("wss://wumpus.online:8443/socket", write);
 
     const inputHandler = (e) => {
         var v = input().value;
         e.preventDefault();
         input().value = "";
-        if (inputState == 1) {
-            write(prompt().innerText + v);
-            sock.send(v);
-        } else if (inputState == 2) { // collect username
-            if (v.toUpperCase() === "NEW") {
-                inputState = 4;
-                write("Enter the new player username.");
-            } else {
-                username = v;
-                inputState = 3;
-                // TODO toggle input mask
-                write("Enter your password.")
-            }
-        } else if (inputState == 3) { // collect password
-            sock.auth(username, v, authCallback);
-            // TODO toggle input mask
-        } else if (inputState == 4) { // collect new username
-            username = v;
-            inputState = 5;
-            // TODO toggle input mask
-            write("Enter the new player password.");
-        } else if (inputState == 5) { // collect new password
-            pwCheck = v;
-            inputState = 6;
-            write("Enter the new password again to confirm.");
-        } else if (inputState == 6) { // validate new password
-            if (v === pwCheck) {
-                sock.newUser(username, v, authCallback);
-            } else {
-                inputState = 5;
-                write("Passwords did not match.");
-                write("Enter the new player password.");
-            }
-        }
+        state.input(v);
         window.scrollTo(0, document.body.scrollHeight);
     };
 
@@ -103,7 +52,6 @@ export default function (id) {
             promptBuffer: "> ",
             lineWidth: 80,
             stylesheet: "wumpush.css",
-            greeting: "Wumpus Shell\nby Proud Lobster Games"
         },
         load: (p = {}) => {
             Object.assign($.vars, p);
@@ -115,9 +63,8 @@ export default function (id) {
             window.addEventListener("click", clickFocusHandler);
             term().querySelector(".input-form").addEventListener("submit", inputHandler);
             setLineWidth($.vars.lineWidth);
+            state.init();
             input().focus();
-            write($.vars.greeting);
-            sock = sockf('wss://wumpus.online:8443/socket', write, connectCallback);
         }
     };
 

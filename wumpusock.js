@@ -1,62 +1,50 @@
-export default function (url, writer, cb) {
-    // TODO pull out writer, push all server responses to callback
+export default function (url, cb) {
     var sessionId = null;
     var heartbeatTimer = null;
     var callback = cb;
 
-    const sockout = t => {
-        writer("WUMPUSOCK: " + t);
-    }
-
-    const goCallback = (c, s) => {
-        callback(c, s);
-        callback = cb;
-    }
-
-    const heartbeat = () => {
-        getSocket().send(sessionId + "\u001EPING\u001E" + Date.now());
+    const message = (c, p) => {
+        return {
+            sessionId: sessionId,
+            command: c,
+            payload: p,
+            text: () => sessionId + "\u001E" + c + "\u001E" + p
+        }
     }
 
     const messageHandler = m => {
+        console.log("in: " + m);
         var parts = m.split("\u001E");
         var sid = parts[0];
-        var type = parts[1];
-        var content = parts[2];
+        var command = parts[1];
+        var payload = parts[2];
 
-        switch (type) {
-            case "SUCCESS":
-                if (sessionId != sid) {
-                    sessionId = sid;
-                    // TODO move heartbeat to onopen
-                    heartbeatTimer = setInterval(heartbeat, 5000);
-                }
-                goCallback(true, content);
-                break;
-            case "PRINT":
-                writer(content);
-                break;
-            default:
-                sockout("Bad message (" + m + ")");
+        if (sessionId != sid) {
+            sessionId = sid;
         }
+
+        callback({
+            sessionId: sid,
+            command: command,
+            payload: payload
+        })
     }
 
     const newSocket = () => {
         var ws = new WebSocket(url);
         ws.onopen = (e) => {
-            sockout("Connected to server");
+            heartbeatTimer = setInterval(() => getSocket().send(message("PING", Date.now()).text()), 5000);
         }
         ws.onclose = (e) => {
-            sockout("Disconnected from server (" + e.code + " - " + e.reason + ")");
+            callback(message("CLIENT_ERROR", "Disconnected from server (" + e.code + " - " + e.reason + ")"));
             clearInterval(heartbeatTimer);
         }
         ws.onerror = (e) => {
-            sockout("Error (" + JSON.stringify(e) + ")");
+            callback(message("CLIENT_ERROR", "Error (" + JSON.stringify(e) + ")"));
         }
         ws.onmessage = (e) => {
             messageHandler(e.data);
         }
-
-        sockout("Connecting to " + url + " ...");
         return ws;
     }
 
@@ -64,26 +52,23 @@ export default function (url, writer, cb) {
 
     const getSocket = () => {
         if (socket.readyState != WebSocket.OPEN) {
-            sockout("Socket closed unexpectedly!");
+            callback(message("CLIENT_ERROR", "Socket closed unexpectedly!"));
             socket = newSocket();
         }
         return socket;
     }
 
-    const $ = {
-        // TODO make these match the commands being sent (login, token, execute, logout)
-        send: (t) => {
-            getSocket().send(sessionId + "\u001ECOMMAND\u001E" + t);
-        },
-        auth: (u, p, c) => {
-            getSocket().send(sessionId + "\u001ELOG_IN\u001E" + u + " " + p);
-            callback = c;
-        },
-        newUser: (u, p, c) => {
-            getSocket().send(sessionId + "\u001ECREATE_PLAYER\u001E" + u + " " + p);
-            callback = c;
-        }
-    };
+    const sendMessage = (c, p) => {
+        var m = message(c, p).text();
+        console.log("out: " + m);
+        getSocket().send(m);
+    }
 
-    return $;
+    return {
+        login: (t) => sendMessage("LOGIN", t),
+        token: (t) => sendMessage("TOKEN", t),
+        execute: (t) => sendMessage("EXECUTE", t),
+        logout: (t) => sendMessage("LOGOUT", t)
+    }
+
 }

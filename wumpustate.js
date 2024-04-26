@@ -12,12 +12,15 @@ export default function (sockAddr, print) {
 
     const defaultServerHandle = e => {
         switch (e.command) {
+            case "CLIENT_ERROR":
+                print("Client Error: " + e.payload);
+                break;
             case "PRINT":
             case "SUCCESS":
                 print(e.payload);
                 break;
             case "FAILURE":
-                print("! Error: " + e.payload);
+                print("Server Error: " + e.payload);
                 break;
             case "TOKEN":
                 localStorage.setItem("wumpush.client.token", e.payload);
@@ -94,7 +97,7 @@ export default function (sockAddr, print) {
         },
         inputHandle: e => {
             // TODO validate email format?
-            localStorage.setItem("wumpush.client.email", e.text);
+            localStorage.setItem("wumpush.client.email", e);
             localStorage.setItem("wumpush.client.token", "");
             push(3);
         },
@@ -139,7 +142,6 @@ export default function (sockAddr, print) {
                 default:
                     defaultServerHandle(e);
             }
-
         }
     }
 
@@ -151,11 +153,26 @@ export default function (sockAddr, print) {
      */
     states[4] = {
         enter: NOOP,
-        inputHandle: e => {
-            sock.token(clientEmail() + ":" + e.text);
-            push(3);
-        },
-        serverHandle: defaultServerHandle
+        inputHandle: e => sock.token(clientEmail() + ":" + e),
+        serverHandle: e => {
+            switch (e.command) {
+                case "FAILURE":
+                    localStorage.setItem("wumpush.client.email", "");
+                    localStorage.setItem("wumpush.client.token", "");
+                    print(e.payload);
+                    push(2);
+                    break;
+                case "PRINT":
+                    print(e.payload);
+                    push(4);
+                    break;
+                case "TOKEN":
+                    localStorage.setItem("wumpush.client.token", e.payload);
+                    push(2);
+                default:
+                    defaultServerHandle(e);
+            }
+        }
     }
 
     /**
@@ -165,7 +182,7 @@ export default function (sockAddr, print) {
      */
     states[5] = {
         enter: NOOP,
-        inputHandle: e => sock.execute(e.text),
+        inputHandle: e => sock.execute(e),
         serverHandle: defaultServerHandle
     }
 
