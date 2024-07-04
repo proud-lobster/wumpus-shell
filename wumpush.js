@@ -33,10 +33,13 @@ export default function (id) {
     var state = statef("wss://wumpus.online:8443/socket", write);
 
     const inputHandler = (e) => {
-        var v = input().value;
+        var v = input().value.trim();
         e.preventDefault();
         input().value = "";
-        state.input(v);
+        write("> " + v);
+        if (v.length > 0) {
+            state.input(v);
+        }
         window.scrollTo(0, document.body.scrollHeight);
     };
 
