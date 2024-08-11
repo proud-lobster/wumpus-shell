@@ -20,7 +20,7 @@ body {
 .wumpus-console .lines p {
     margin: 0;
     overflow-wrap: break-word;
-    white-space: pre;
+    white-space-collapse: preserve;
 }
 
 /* Spacing at bottom */
