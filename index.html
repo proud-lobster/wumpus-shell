@@ -4,7 +4,8 @@
     <title>Wumpus Console</title>
     <script type="module" defer>
         import con from './wumpush.js';
-        con("console-1").load();
+        const params = new URLSearchParams(window.location.search);
+        con("console-1", params.get("host"), params.get("port"), params.get("path")).load();
     </script>
 </head>
 

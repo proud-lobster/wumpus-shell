@@ -1,7 +1,11 @@
 import statef from './wumpustate.js'
 
-export default function (id) {
+export default function (id, h, p, a) {
 
+    const host = h ? h : "serve.the.wumpus.online";
+    const port = p ? p : "8443";
+    const path = a ? a : "socket";
+    
     const term = () => document.querySelector("#" + id + ".wumpus-console");
     const lines = () => term().querySelector(".lines");
     const prompt = () => term().querySelector(".prompt");
@@ -30,7 +34,7 @@ export default function (id) {
         input().style.width = (w - l) + "ch";
     }
 
-    var state = statef("wss://wumpus.online:8443/socket", write);
+    var state = statef("wss://" + host + ":" + port + "/" + path, write);
 
     const inputHandler = (e) => {
         var v = input().value.trim();
