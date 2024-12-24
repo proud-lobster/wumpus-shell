@@ -1,9 +1,10 @@
 body {
-    background-color: black;  
+    background-color: black;
 }
 
 /* Console coloring */
-.wumpus-console, .wumpus-console input[type="text"] {
+.wumpus-console,
+.wumpus-console input[type="text"] {
     background-color: black;
     color: white;
     font: 1rem Inconsolata, monospace;
@@ -17,7 +18,7 @@ body {
 }
 
 /* Fit console lines */
-.wumpus-console .lines p {
+.wumpus-console .content p {
     margin: 0;
     overflow-wrap: break-word;
     white-space-collapse: preserve;

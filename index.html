@@ -2,16 +2,16 @@
 
 <head>
     <title>Wumpus Console</title>
+    <link rel="stylesheet" href="wumpush.css">
     <script type="module" defer>
-        import con from './wumpush.js';
-        const params = new URLSearchParams(window.location.search);
-        con("console-1", params.get("host"), params.get("port"), params.get("path")).load();
+        import Terminal from './Terminal.js';
+        new Terminal().init();
     </script>
 </head>
 
 <body>
-    <div id="console-1" class="wumpus-console">
-        <div class="lines">
+    <div class="wumpus-console">
+        <div class="content">
         </div>
         <div>
             <form class="input-form" autocomplete="off">
