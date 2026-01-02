@@ -35,7 +35,7 @@ export default function (machine, toSock, sockAddr, storage) {
         LOGIN: {
             onenter() {
                 toOut(`Logging in as ${storage.clientEmail}...`);
-                toSock("LOGIN", storage.clientEmail + ":" + storage.clientToken);
+                toSock("LOGIN", storage.clientEmail + " " + storage.clientToken);
             },
             onsuccess(p) {
                 toOut(p);
@@ -59,7 +59,7 @@ export default function (machine, toSock, sockAddr, storage) {
 
         PASSCODE: {
             oninput(i) {
-                toSock("TOKEN", storage.clientEmail + ":" + i);
+                toSock("TOKEN", storage.clientEmail + " " + i);
             },
             onfailure(p) {
                 toOut(p);
