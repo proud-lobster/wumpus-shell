@@ -53,7 +53,13 @@ export default class StateMachine {
     }
 
     onpingDefault(p) {
-        this.storage.clientHud = p;
+        this.refresh();
+    }
+
+    ondataDefault(p) {
+        if (p.startsWith("HUD ")) {
+            this.storage.clientHud = p.slice(4);
+        }
         this.refresh();
     }
 }
